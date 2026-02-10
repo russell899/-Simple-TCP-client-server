@@ -34,66 +34,70 @@ A simple TCP client-server pair written in C for Linux.
   - Sends `count=<n>\n`
   - Receives echoed data and prints both sent/received messages
 
-Run
-1) Start the server
+## Build
 
+Build with Makefile:
+
+    make
+
+Clean binaries:
+
+    make clean
+
+---
+
+## Run
+
+### 1) Start the server
 Open Terminal A:
 
-./server
-
+    ./server
 
 You should see:
 
-server: waiting for connections...
+- `server: waiting for connections...`
+- `server: got connection from <client_ip>`
 
-server: got connection from <client_ip>
-
-2) Start one client
-
+### 2) Start one client
 Open Terminal B:
 
-./client -h 127.0.0.1 -p 8080
-
+    ./client -h 127.0.0.1 -p 8080
 
 Example output (will vary):
 
-client: attempting to connect to ...
+- `client: attempting to connect to ...`
+- `client: connecting to ...`
+- `client: sent: count=1`
+- `client: recv: count=1`
+- `...`
 
-client: connecting to ...
+### 3) Multiple clients
+Open more terminals and run the same client command multiple times:
 
-client: sent: count=1
+    ./client -h 127.0.0.1 -p 8080
 
-client: recv: count=1
-
-...
-
-3) Multiple clients
-
-Open more terminals and run the same client command multiple times.
 The server will handle them concurrently (one thread per client connection).
 
-Verification with Wireshark
+---
+
+## Verification with Wireshark
 
 Capture on loopback and filter by port:
 
-Display filter: tcp.port == 8080
+- Display filter: `tcp.port == 8080`
 
 You should observe:
 
-TCP 3-way handshake (SYN → SYN/ACK → ACK)
+- TCP 3-way handshake (SYN → SYN/ACK → ACK)
+- Payload packets (PSH/ACK carrying application data)
+- Connection teardown (FIN/ACK sequence)
 
-Payload packets (PSH/ACK carrying application data)
+A sample capture file is included: `echo_8080_lo.pacp`.
 
-Connection teardown (FIN/ACK sequence)
+---
 
-A sample capture file is included: echo_8080_lo.pacp.
+## Notes / Known Issues
 
-Notes / Known Issues
-
-Server is currently configured for IPv4 only (hints.ai_family = AF_INET).
-
-client.c closes the socket twice at the end (close(sockfd); appears twice).
-It usually won’t crash, but it’s best to remove the duplicate close to avoid undefined behavior.
-
-```bash
-make
+- Server is currently configured for IPv4 only (`hints.ai_family = AF_INET`).
+- `client.c` closes the socket twice at the end (`close(sockfd);` appears twice).  
+  It usually won’t crash, but it’s best to remove the duplicate `close()` to avoid undefined behavior.
