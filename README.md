@@ -96,8 +96,4 @@ A sample capture file is included: `echo_8080_lo.pacp`.
 
 ---
 
-## Notes / Known Issues
 
-- Server is currently configured for IPv4 only (`hints.ai_family = AF_INET`).
-- `client.c` closes the socket twice at the end (`close(sockfd);` appears twice).  
-  It usually won’t crash, but it’s best to remove the duplicate `close()` to avoid undefined behavior.
